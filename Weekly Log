@@ -1,0 +1,16 @@
+Week 1:
+
+Calibration (sensor reading)
+In order to calibrate the phototransistor, we took sample data with different darkness lines.
+Each transistor outputs values that corresponds to the amount of IR light that the sensors recieves.
+  - Darker-colored prints should output higher values while whiter colors should be lower. 
+While shfting the sample "path" from one end to another, we took 9 readings, spaning from -4 to +4cm, for 5 ticks each and recorded each values on a google sheet. 
+
+Google Sheet
+We took the average of 5 readings for each sensors, so that we have 9 lines of samples in total.
+We then found the minimum value of each sensor and subtracted them from the readings for each sensor. 
+  e.g.) If the minimum value of sensor 1 was x, subtract x from all sensor readings for sensor 1. 
+Normalized all sensor readings using equation f(x) = x*10/max, where max is the max value after subtracting minimum value
+
+Week 2: 
+
