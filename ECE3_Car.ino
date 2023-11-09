@@ -16,6 +16,10 @@ int right_spd;
 const float mins[8] = {483,506,628.6,510.8,437,460,460,599};
 const float maxs[8] = {1993,1736.8,1871.4,1329,1159,1159,903.8,1901};
 const float weights[8] = {-15.0, -14.0, -12.0, -8.0, 8.0, 12.0, 14.0, 15.0};
+uint16_t prev[8];
+
+bool started;
+bool uturn;
 
 void setup()
 {
@@ -39,6 +43,9 @@ void setup()
 
   left_spd = 0;
   right_spd = 0;
+
+  started = false;
+  uturn = false;
   
   ECE3_Init();
   Serial.begin(9600); // set the data rate in bits per second for serial data transmission
@@ -50,6 +57,7 @@ float turnAmount(uint16_t x[]) {
   float sum = 0;
   for (int i = 0; i < 8; i++) {
     sum = sum + (weights[i] * (x[i] - mins[i]) / maxs[i]);
+    prev[i] = x[i];
   }
   return sum;
 }
@@ -62,7 +70,22 @@ void loop()
   ECE3_read_IR(sensorValues);
   //sensorValues[i]
 
-  //check to see if the car is reading a black line across all sensors (start or finish line
+  //check to see if the car is reading a black line across all sensors (start or finish line)
+  if (sensorValues[0] > 2000 && sensorValues[1] > 2000 &&
+  sensorValues[2] > 2000 && sensorValues[3] > 2000 &&
+  sensorValues[4] > 2000 && sensorValues[5] > 2000 &&
+  sensorValues[6] > 2000 && sensorValues[7] > 2000) {
+    if (!started) {
+      started = true;
+      left_spd = 30;
+      right_spd = 30;
+      Serial.println("Start");
+    }
+    else {
+      uturn == true;
+      //uturn
+    }
+  }
   //have a bool to tell if the car has started so when we see this line we know whether it is the start or end of the track
   //if at the start, start moving forward
   //if at the end, do a donut
@@ -74,8 +97,7 @@ void loop()
   analogWrite(right_pwm_pin,right_spd);
 
 
-  // print the sensor values as numbers from 0 to 2500, where 0 means maximum reflectance and
-  // 2500 means minimum reflectance
+  
   
 
   delay(1000);
