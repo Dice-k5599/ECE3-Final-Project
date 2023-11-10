@@ -12,10 +12,11 @@ const int right_pwm_pin=39;
 const int LED_RF = 41;
 int left_spd;
 int right_spd;
+const float Kp = 0.1;
 
 const float mins[8] = {483,506,628.6,510.8,437,460,460,599};
 const float maxs[8] = {1993,1736.8,1871.4,1329,1159,1159,903.8,1901};
-const float weights[8] = {-15.0, -14.0, -12.0, -8.0, 8.0, 12.0, 14.0, 15.0};
+const float weights[8] = {-19.0, -17.0, -13.0, -9.0, 8.0, 12.0, 14.0, 15.0};
 uint16_t prev[8];
 
 bool started;
@@ -36,7 +37,7 @@ void setup()
   digitalWrite(left_dir_pin,LOW);
   digitalWrite(left_nslp_pin,HIGH);
 
-  digitalWrite(right_dir_pin,HIGH);
+  digitalWrite(right_dir_pin,LOW);
   digitalWrite(right_nslp_pin,HIGH);
 
   pinMode(LED_RF, OUTPUT);
@@ -57,7 +58,6 @@ float turnAmount(uint16_t x[]) {
   float sum = 0;
   for (int i = 0; i < 8; i++) {
     sum = sum + (weights[i] * (x[i] - mins[i]) / maxs[i]);
-    prev[i] = x[i];
   }
   return sum;
 }
@@ -71,15 +71,22 @@ void loop()
   //sensorValues[i]
 
   //check to see if the car is reading a black line across all sensors (start or finish line)
-  if (sensorValues[0] > 2000 && sensorValues[1] > 2000 &&
-  sensorValues[2] > 2000 && sensorValues[3] > 2000 &&
-  sensorValues[4] > 2000 && sensorValues[5] > 2000 &&
-  sensorValues[6] > 2000 && sensorValues[7] > 2000) {
+  if (sensorValues[0] > 1600 && sensorValues[1] > 1600 &&
+  sensorValues[2] > 1600 && sensorValues[3] > 1600 &&
+  sensorValues[4] > 1600 && sensorValues[5] > 1600 &&
+  sensorValues[6] > 1600 && sensorValues[7] > 1600 &&
+  prev[0] > 1600 && prev[1] > 1600 &&
+  prev[2] > 1600 && prev[3] > 1600 &&
+  prev[4] > 1600 && prev[5] > 1600 &&
+  prev[6] > 1600 && prev[7] > 1600) {
     if (!started) {
+      digitalWrite(LED_RF,HIGH);
+      delay(50);
+      digitalWrite(LED_RF,LOW);
       started = true;
       left_spd = 30;
       right_spd = 30;
-      Serial.println("Start");
+      
     }
     else {
       uturn == true;
@@ -91,14 +98,32 @@ void loop()
   //if at the end, do a donut
 
   //use the amount below to change the speed of the wheels
-  Serial.println(turnAmount(sensorValues));
 
+  float error = turnAmount(sensorValues);
+  int turn_amt = Kp * error;
+  if (started) {
+    Serial.println(turn_amt);
+      if (left_spd + (turn_amt) >= 15 && left_spd + (turn_amt) < 45) {
+        left_spd = left_spd - (Kp * error);
+      }
+      if (right_spd - (turn_amt) < 45 && right_spd - (turn_amt) >= 15) {
+        right_spd = right_spd + (turn_amt);
+      }
+    
+    
+
+  }
+
+  //Serial.print(right_spd);
+  //Serial.print(" ");
+  //Serial.println(left_spd);
   analogWrite(left_pwm_pin,left_spd);
   analogWrite(right_pwm_pin,right_spd);
 
+  for (int i = 0; i < 8; i++) {
+    prev[i] = sensorValues[i];
+    
+  }
+  delay(50);
 
-  
-  
-
-  delay(1000);
 }
