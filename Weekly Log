@@ -18,7 +18,13 @@ Week 3:
 
 Testing:
 
-Code adjustment:
+Test #1
+
+  - Observation: After placing the car on the track, we had to manually position it so that it detected the black line. The car started doing donuts after starting and continued.
+    * The left wheel was moving forward while the right wheel was going backward. 
+    * The speed of each wheel differed, even when the wheel was placed in the middle of the track.
+
+Code adjustment: The pinMode definition of the right wheel was wrong. The direction pin should have been initialized to LOW but was set to HIGH. 
 
 Observation: The car followed the track all the way while the line was straight. The car 
 
