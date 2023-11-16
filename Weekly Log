@@ -14,9 +14,17 @@ Normalized all sensor readings using equation f(x) = x*10/max, where max is the 
 
 Week 2: 
 
+Re-calibration
+We decided that the nine readings from the previous week wasn't enough, so we took measurements at every single tick mark and redid the callibration.
+Then we created a function in our code to normalize the IR sensor readings and add them together to a single value based on our custom weighting.
+This single value is our error term, and it tells us which direction and how fast the car needs to turn. We used 15, 14, 12, 8 weighting.
+
 Week 3:
 
 Testing:
+
+Code adjustment: we added proportional control and the code to turn the wheels based on the IR sensor readings and Kp.
+We also added code to detect a crosspiece by checking if the previous and the current readings are all black
 
 Test #1
 
@@ -26,5 +34,17 @@ Test #1
 
 Code adjustment: The pinMode definition of the right wheel was wrong. The direction pin should have been initialized to LOW but was set to HIGH. 
 
-Observation: The car followed the track all the way while the line was straight. The car 
+Test #2
+
+  - Observation: The car followed the track all the way while the line was straight. The car zig zagged along the track and almost went off the track multiple times
+
+Code adjustment: We adjusted our Kp so that the adjustmets when the car was to the side wouldn't be so extreme
+
+Week 4:
+
+Test #3
+
+  - Observation: The car followed the line for the straight part and some of the curved parts. There was a lot less zig zagging, but still some
+
+Code adjustment: We added derivative control and chose our value of Kd to be 0.5. This value is just a guess. We plan on seeing how the car drives on the track and adjusting it
 
