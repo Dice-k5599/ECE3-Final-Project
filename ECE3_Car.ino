@@ -98,7 +98,7 @@ float turnAmount(uint16_t x[]) {
 }
 
 bool isDarkLineDetected(uint16_t x[]) {
-  float threshold = 1600;
+  float threshold = 1750;
   for (int i = 0; i < 8; i++)
   {
     if (x[i] < threshold)
@@ -137,12 +137,16 @@ void loop()
   left_spd = BASE_SPD + turn_amt;
   right_spd = BASE_SPD - turn_amt;
 
+ 
+
   curr_is_black = isDarkLineDetected(sensorValues);
   if (curr_is_black && prev_is_black) {
-    for (int i = 0; i < 100; i++) {
-      analogWrite(left_pwm_pin,-30);
-      analogWrite(right_pwm_pin,30);
+    digitalWrite(left_dir_pin,HIGH);
+    for (int i = 0; i < 100000; i++) {
+      analogWrite(left_pwm_pin, 45);
+      analogWrite(right_pwm_pin,45);
     }
+    digitalWrite(left_dir_pin,LOW);
   }
   prev_is_black = curr_is_black;
 
