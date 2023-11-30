@@ -2,8 +2,6 @@
 
 // array for storing sensor value of previous tick and current tick
 uint16_t sensorValues[8];
-uint16_t prev[8];
-
 // left wheel pin definitions
 const int left_nslp_pin=31; // nslp ==> awake & ready for PWM
 const int left_dir_pin=29;
@@ -54,7 +52,9 @@ const float Kd = 5; // 1
 
 // bools that store 
 // bool started;
-bool uturn = false;
+
+bool prev_is_black = false;
+bool curr_is_black = false;
 
 void setup()
 {
@@ -82,7 +82,6 @@ void setup()
   
   left_spd = BASE_SPD;
   right_spd = BASE_SPD;
-  uturn = true;
 }
 
 
@@ -138,6 +137,15 @@ void loop()
   left_spd = BASE_SPD + turn_amt;
   right_spd = BASE_SPD - turn_amt;
 
+  curr_is_black = isDarkLineDetected(sensorValues);
+  if (curr_is_black && prev_is_black) {
+    for (int i = 0; i < 100; i++) {
+      analogWrite(left_pwm_pin,-30);
+      analogWrite(right_pwm_pin,30);
+    }
+  }
+  prev_is_black = curr_is_black;
+
 //  if (next_left_spd >= (BASE_SPD - BASE_SPD * min_turn_multiplier) && next_left_spd < (BASE_SPD + BASE_SPD * max_turn_multiplier)) {
 //    left_spd = next_left_spd;
 //  }
@@ -159,9 +167,7 @@ void loop()
   analogWrite(left_pwm_pin,left_spd);
   analogWrite(right_pwm_pin,right_spd);
 
-  for (int i = 0; i < 8; i++) {
-    prev[i] = sensorValues[i];  
-  }
+  
   //delay(10);
 
 }
