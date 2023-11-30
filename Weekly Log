@@ -65,9 +65,19 @@ Test #6
   -Observation: The car did not zig zag but it was very jittery. The car followed the race track fully in one direction, but not in the other direction
 
 Code adjustment: We found a major mistake in the way we were updating the wheel speeds. We we're updating the speed based on the previous speed and the error rather than just the error. 
-                 This explains why the car was so jittery. We fixed this issue and now.
+                 This explains why the car was so jittery. We fixed this issue and will test it during the next lab session.
+
+Week 5:
 
 Test #7
 
   -Observation: the car is no longer jittery, and it follows the straight part of the race track very well, but goes off the track at some of the turns.
 
+Code adjustment: We increased Kp to to 1.25 and decreased Kd back to 5 so that the car follows the line a little bit better.
+                 We also decreased the weights of the outer two sensors from 15 to 10 so that the black parts of the track around the turns did not affect the cars sensing
+
+Test #8
+
+  -Observation: the car followed the lines very closely and made it past one of the turns perfectly, but on the second turn the car was affected by the black parts outside the track.
+
+Code adjustment: We decreased the weights of the outer two sensors from 10 to 8 so that the car will be less affected by the black parts around the turns.
