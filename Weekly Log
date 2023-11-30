@@ -48,3 +48,26 @@ Test #3
 
 Code adjustment: We added derivative control and chose our value of Kd to be 0.5. This value is just a guess. We plan on seeing how the car drives on the track and adjusting it
 
+Test #4
+
+  -Observation: The car zig zagged slightly less but not a significant amount. The car followed a straight line and 
+
+Code adjustment: We increased Kd to be 5
+
+Test #5
+
+  -Observation: The car zig zagged a lot less, but still a little bit. The car was able to follow a straight line and one turn very well.
+
+Code adjustement: We increased Kd to be 10
+
+Test #6
+
+  -Observation: The car did not zig zag but it was very jittery. The car followed the race track fully in one direction, but not in the other direction
+
+Code adjustment: We found a major mistake in the way we were updating the wheel speeds. We we're updating the speed based on the previous speed and the error rather than just the error. 
+                 This explains why the car was so jittery. We fixed this issue and now.
+
+Test #7
+
+  -Observation: the car is no longer jittery, and it follows the straight part of the race track very well, but goes off the track at some of the turns.
+
