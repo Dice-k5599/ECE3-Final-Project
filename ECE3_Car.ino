@@ -2,6 +2,8 @@
 
 // array for storing sensor value of previous tick and current tick
 uint16_t sensorValues[8];
+uint16_t prev[8];
+
 // left wheel pin definitions
 const int left_nslp_pin=31; // nslp ==> awake & ready for PWM
 const int left_dir_pin=29;
@@ -37,21 +39,22 @@ int max_turn_multiplier = 0.75;
 // constants storing values needed to calculate turn amount
 const float mins[8] = {483.0,506,628.6,510.8,437.0,460.0,460.0,599.0};
 const float maxs[8] = {1993.0,1736.8,1871.4,1329.0,1159.0,1098.0,903.8,1901.0};
-const float weights[8] = {-15.0, -14.0, -12.0, -8.0, 8.0, 12.0, 14.0, 15.0};
+const float weights[8] = {-15.0, -14.0, -12.0, -14.0, 14.0, 12.0, 14.0, 15.0};
 
 
 // Base speed, Kp and Kd values (subject to change over iterations)
 
 //Kp should be a value so that max error (around +/- 20.15) yeilds BASE_SPD / 2;
 //
-const float BASE_SPD = 30.0;
+const float BASE_SPD = 50.0;
 //const float Kp = (BASE_SPD * 0.5) / 20.15 ; // = 0.7444  //subject to change (*.1)
-const float Kp = 1.25;
+float Kp = 1.6;
 //const float Kp = 1;
-const float Kd = 5; // 1
+float Kd = 1; // 1
 
 // bools that store 
 // bool started;
+bool uTurnCompleted = false;
 
 bool prev_is_black = false;
 bool curr_is_black = false;
@@ -82,6 +85,7 @@ void setup()
   
   left_spd = BASE_SPD;
   right_spd = BASE_SPD;
+ // uturn = true;
 }
 
 
@@ -98,13 +102,21 @@ float turnAmount(uint16_t x[]) {
 }
 
 bool isDarkLineDetected(uint16_t x[]) {
-  float threshold = 1750;
+  float threshold = 1800;
   for (int i = 0; i < 8; i++)
   {
     if (x[i] < threshold)
       return false;
   }
   return true;
+}
+
+bool wallDetected(uint16_t x[]) {
+  float threshold = 1800;
+  if (x[0] > threshold || x[7] > threshold)
+    return true;
+  else
+    return false;
 }
 
 
@@ -118,6 +130,41 @@ void loop()
   //have a bool to tell if the car has started so when we see this line we know whether it is the start or end of the track
   //if at the start, start moving forward
   //if at the end, do a donut
+
+  // Uturn algorithm
+  curr_is_black = isDarkLineDetected(sensorValues);
+  if (curr_is_black && prev_is_black) {
+      if (!uTurnCompleted)
+      {
+          digitalWrite(left_dir_pin,HIGH);
+          for (int i = 0; i < 110000; i++) {
+            analogWrite(left_pwm_pin, 45);
+            analogWrite(right_pwm_pin,45);
+          }
+          digitalWrite(left_dir_pin,LOW);
+          uTurnCompleted = true;
+      }
+      else
+        {
+          analogWrite(left_pwm_pin, 0);
+          analogWrite(right_pwm_pin, 0);
+          exit(0);
+        }
+  }
+  prev_is_black = curr_is_black;
+
+  
+  // to avoid undesired behaviors on parts of track where there are black walls, make the car edge sensor value when it detects
+  // black walls. 
+  if (wallDetected(sensorValues) == true)
+  {
+    sensorValues[0] = 0.0;
+    sensorValues[1] = 0.0;
+    sensorValues[6] = 0.0;
+    sensorValues[7] = 0.0;
+    Kp = 2.5;
+    Kd = 0;
+  }
 
   //use the amount below to change the speed of the wheels
 
@@ -137,19 +184,6 @@ void loop()
   left_spd = BASE_SPD + turn_amt;
   right_spd = BASE_SPD - turn_amt;
 
- 
-
-  curr_is_black = isDarkLineDetected(sensorValues);
-  if (curr_is_black && prev_is_black) {
-    digitalWrite(left_dir_pin,HIGH);
-    for (int i = 0; i < 100000; i++) {
-      analogWrite(left_pwm_pin, 45);
-      analogWrite(right_pwm_pin,45);
-    }
-    digitalWrite(left_dir_pin,LOW);
-  }
-  prev_is_black = curr_is_black;
-
 //  if (next_left_spd >= (BASE_SPD - BASE_SPD * min_turn_multiplier) && next_left_spd < (BASE_SPD + BASE_SPD * max_turn_multiplier)) {
 //    left_spd = next_left_spd;
 //  }
@@ -168,10 +202,19 @@ void loop()
 //  Serial.print("Left wheel speed : ");
 //  Serial.println(left_spd);
 //  Serial.println();
+
+//  for (int i = 0; i < 8; i++ ) {
+//    Serial.print(sensorValues[i]);
+//    Serial.print(" ");
+//  }
+//  Serial.println();
+  
   analogWrite(left_pwm_pin,left_spd);
   analogWrite(right_pwm_pin,right_spd);
 
-  
-  //delay(10);
+  for (int i = 0; i < 8; i++) {
+    prev[i] = sensorValues[i];  
+  }
+  Kp = 1.6;
 
 }
